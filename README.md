@@ -59,6 +59,43 @@ Set schedule setiap 1-2 menit.
 
 Tidak ada environment variables yang diperlukan untuk saat ini.
 
+## Docker
+
+### Build Image
+
+```bash
+docker build -t category-api .
+```
+
+### Run Container
+
+```bash
+docker run -d -p 8080:8080 --name category-api category-api
+```
+
+### Menggunakan Docker Compose
+
+```bash
+# Build dan run
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
+```
+
+### Build untuk Production
+
+```bash
+# Build dengan tag
+docker build -t category-api:latest .
+
+# Run dengan environment variable PORT
+docker run -d -p 8080:8080 -e PORT=8080 --name category-api category-api:latest
+```
+
 ## Menjalankan Lokal
 
 ```bash
