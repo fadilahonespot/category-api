@@ -14,8 +14,6 @@ type Category struct {
 	Id          int       `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type CategoryStore struct {
@@ -24,42 +22,31 @@ type CategoryStore struct {
 }
 
 func NewCategoryStore() *CategoryStore {
-	now := time.Now()
 	dummyCategories := []Category{
 		{
 			Id:          1,
 			Name:        "Elektronik",
 			Description: "Perangkat elektronik dan peralatan",
-			CreatedAt:   now,
-			UpdatedAt:   now,
 		},
 		{
 			Id:          2,
 			Name:        "Pakaian",
 			Description: "Pakaian dan aksesori pakaian",
-			CreatedAt:   now,
-			UpdatedAt:   now,
 		},
 		{
 			Id:          3,
 			Name:        "Makanan & Minuman",
 			Description: "Makanan dan minuman",
-			CreatedAt:   now,
-			UpdatedAt:   now,
 		},
 		{
 			Id:          4,
 			Name:        "Buku",
 			Description: "Buku dan bahan bacaan",
-			CreatedAt:   now,
-			UpdatedAt:   now,
 		},
 		{
 			Id:          5,
 			Name:        "Olahraga & Outdoor",
 			Description: "Peralatan olahraga dan peralatan outdoor",
-			CreatedAt:   now,
-			UpdatedAt:   now,
 		},
 	}
 
@@ -85,8 +72,6 @@ func (cs *CategoryStore) GetByID(id int) (*Category, error) {
 func (cs *CategoryStore) Create(category Category) Category {
 	category.Id = cs.nextId
 	cs.nextId++
-	category.CreatedAt = time.Now()
-	category.UpdatedAt = time.Now()
 	cs.categories = append(cs.categories, category)
 	return category
 }
@@ -95,8 +80,6 @@ func (cs *CategoryStore) Update(id int, updated Category) (*Category, error) {
 	for i := range cs.categories {
 		if cs.categories[i].Id == id {
 			updated.Id = id
-			updated.CreatedAt = cs.categories[i].CreatedAt
-			updated.UpdatedAt = time.Now()
 			cs.categories[i] = updated
 			return &cs.categories[i], nil
 		}
@@ -125,10 +108,6 @@ func main() {
 			"message": "Server is running",
 			"time":    time.Now().Format(time.RFC3339),
 		})
-	})
-
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
 	router.GET("/categories", func(c *gin.Context) {

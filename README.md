@@ -2,62 +2,257 @@
 
 API CRUD untuk mengelola kategori menggunakan Go dan Gin framework.
 
+## Base URL
+
+```
+http://localhost:8080
+```
+
 ## Endpoints
 
-- **GET** `/categories` → Ambil semua kategori
-- **POST** `/categories` → Tambah kategori
-- **PUT** `/categories/{id}` → Update kategori
-- **GET** `/categories/{id}` → Ambil detail satu kategori
-- **DELETE** `/categories/{id}` → Hapus kategori
-- **GET** `/health` → Health check endpoint
-- **GET** `/ping` → Ping endpoint
+### 1. Health Check
 
-## Deploy ke Render
+#### GET `/health`
 
-### Setup Keep-Alive untuk Paket Gratis
+Mengecek status server.
 
-Render akan mematikan instance gratis setelah 50 detik tidak ada aktivitas. Untuk menjaga server tetap aktif, gunakan salah satu cara berikut:
-
-#### Opsi 1: Menggunakan UptimeRobot (Recommended)
-
-1. Daftar di [UptimeRobot](https://uptimerobot.com/) (gratis)
-2. Tambah monitor baru:
-   - **Monitor Type**: HTTP(s)
-   - **Friendly Name**: Category API Keep-Alive
-   - **URL**: `https://your-app-name.onrender.com/health`
-   - **Monitoring Interval**: 5 minutes (atau lebih sering jika tersedia)
-3. Simpan monitor
-
-#### Opsi 2: Menggunakan cron-job.org
-
-1. Daftar di [cron-job.org](https://cron-job.org/) (gratis)
-2. Buat cron job baru:
-   - **Title**: Keep-Alive Category API
-   - **URL**: `https://your-app-name.onrender.com/health`
-   - **Schedule**: Setiap 1-2 menit (`*/2 * * * *`)
-3. Simpan cron job
-
-#### Opsi 3: Menggunakan Render Cron Jobs (jika tersedia)
-
-Jika Render menyediakan cron jobs, buat cron job yang memanggil:
+**Response:**
+```json
+{
+  "status": "ok",
+  "message": "Server is running",
+  "time": "2024-01-15T10:30:00Z"
+}
 ```
-curl https://your-app-name.onrender.com/health
+
+**Status Code:** `200 OK`
+
+---
+
+### 2. Get All Categories
+
+#### GET `/categories`
+
+Mengambil semua kategori.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Elektronik",
+    "description": "Perangkat elektronik dan peralatan"
+  },
+  {
+    "id": 2,
+    "name": "Pakaian",
+    "description": "Pakaian dan aksesori pakaian"
+  }
+]
 ```
-Set schedule setiap 1-2 menit.
 
-### Cara Deploy
+**Status Code:** `200 OK`
 
-1. Push code ke GitHub
-2. Di Render dashboard, pilih "New Web Service"
-3. Connect repository GitHub Anda
-4. Render akan auto-detect Go
-5. Set build command: `go build -o server`
-6. Set start command: `./server`
-7. Deploy!
+**Example:**
+```bash
+curl http://localhost:8080/categories
+```
 
-### Environment Variables
+---
 
-Tidak ada environment variables yang diperlukan untuk saat ini.
+### 3. Get Category by ID
+
+#### GET `/categories/{id}`
+
+Mengambil detail satu kategori berdasarkan ID.
+
+**Parameters:**
+- `id` (path parameter, required) - ID kategori
+
+**Response:**
+```json
+{
+  "id": 1,
+  "name": "Elektronik",
+  "description": "Perangkat elektronik dan peralatan"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Berhasil
+- `400 Bad Request` - ID tidak valid
+- `404 Not Found` - Kategori tidak ditemukan
+
+**Example:**
+```bash
+curl http://localhost:8080/categories/1
+```
+
+---
+
+### 4. Create Category
+
+#### POST `/categories`
+
+Membuat kategori baru.
+
+**Request Body:**
+```json
+{
+  "name": "Kategori Baru",
+  "description": "Deskripsi kategori baru"
+}
+```
+
+**Request Body Fields:**
+- `name` (string, required) - Nama kategori
+- `description` (string, optional) - Deskripsi kategori
+
+**Response:**
+```json
+{
+  "id": 6,
+  "name": "Kategori Baru",
+  "description": "Deskripsi kategori baru"
+}
+```
+
+**Status Codes:**
+- `201 Created` - Kategori berhasil dibuat
+- `400 Bad Request` - JSON tidak valid atau name kosong
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/categories \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Kategori Baru",
+    "description": "Deskripsi kategori baru"
+  }'
+```
+
+---
+
+### 5. Update Category
+
+#### PUT `/categories/{id}`
+
+Mengupdate kategori yang sudah ada.
+
+**Parameters:**
+- `id` (path parameter, required) - ID kategori yang akan diupdate
+
+**Request Body:**
+```json
+{
+  "name": "Kategori Updated",
+  "description": "Deskripsi yang diupdate"
+}
+```
+
+**Request Body Fields:**
+- `name` (string, required) - Nama kategori baru
+- `description` (string, optional) - Deskripsi kategori baru
+
+**Response:**
+```json
+{
+  "id": 1,
+  "name": "Kategori Updated",
+  "description": "Deskripsi yang diupdate"
+}
+```
+
+**Status Codes:**
+- `200 OK` - Kategori berhasil diupdate
+- `400 Bad Request` - ID tidak valid atau JSON tidak valid
+- `404 Not Found` - Kategori tidak ditemukan
+
+**Example:**
+```bash
+curl -X PUT http://localhost:8080/categories/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Kategori Updated",
+    "description": "Deskripsi yang diupdate"
+  }'
+```
+
+---
+
+### 6. Delete Category
+
+#### DELETE `/categories/{id}`
+
+Menghapus kategori berdasarkan ID.
+
+**Parameters:**
+- `id` (path parameter, required) - ID kategori yang akan dihapus
+
+**Response:**
+Tidak ada response body.
+
+**Status Codes:**
+- `204 No Content` - Kategori berhasil dihapus
+- `400 Bad Request` - ID tidak valid
+- `404 Not Found` - Kategori tidak ditemukan
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:8080/categories/1
+```
+
+---
+
+## Data Models
+
+### Category
+
+```json
+{
+  "id": 1,
+  "name": "Elektronik",
+  "description": "Perangkat elektronik dan peralatan"
+}
+```
+
+**Fields:**
+- `id` (integer) - ID unik kategori (auto-generated)
+- `name` (string, required) - Nama kategori
+- `description` (string, optional) - Deskripsi kategori
+
+---
+
+## Error Responses
+
+Semua error mengembalikan JSON dengan format:
+
+```json
+{
+  "error": "Error message"
+}
+```
+
+**Common Error Status Codes:**
+- `400 Bad Request` - Request tidak valid
+- `404 Not Found` - Resource tidak ditemukan
+- `500 Internal Server Error` - Server error
+
+---
+
+## Menjalankan Lokal
+
+```bash
+# Install dependencies
+go mod download
+
+# Run server
+go run main.go
+```
+
+Server akan berjalan di `http://localhost:8080`
+
+---
 
 ## Docker
 
@@ -86,25 +281,9 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### Build untuk Production
+---
 
-```bash
-# Build dengan tag
-docker build -t category-api:latest .
-
-# Run dengan environment variable PORT
-docker run -d -p 8080:8080 -e PORT=8080 --name category-api category-api:latest
-```
-
-## Menjalankan Lokal
-
-```bash
-go run main.go
-```
-
-Server akan berjalan di `http://localhost:8080`
-
-## Testing
+## Testing dengan cURL
 
 ```bash
 # Health check
@@ -129,3 +308,16 @@ curl -X PUT http://localhost:8080/categories/1 \
 # Delete category
 curl -X DELETE http://localhost:8080/categories/1
 ```
+
+---
+
+## Technology Stack
+
+- **Language**: Go 1.25.0
+- **Framework**: Gin Web Framework
+
+---
+
+## License
+
+MIT
