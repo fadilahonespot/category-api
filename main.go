@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -114,19 +114,22 @@ func (cs *CategoryStore) Delete(id int) error {
 	return fmt.Errorf("category not found")
 }
 
-var store = NewCategoryStore()
+func main() {
+	store := NewCategoryStore()
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	gin.SetMode(gin.ReleaseMode)
-	router := gin.New()
-	router.Use(gin.Recovery())
+	router := gin.Default()
 
-	path := r.URL.Path
-	path = strings.TrimPrefix(path, "/.netlify/functions/category-api")
+	router.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "ok",
+			"message": "Server is running",
+			"time":    time.Now().Format(time.RFC3339),
+		})
+	})
 
-	if !strings.HasPrefix(path, "/") {
-		path = "/" + path
-	}
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"message": "pong"})
+	})
 
 	router.GET("/categories", func(c *gin.Context) {
 		categories := store.GetAll()
@@ -202,16 +205,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		c.Status(http.StatusNoContent)
 	})
 
-	// Update request path and serve
-	r.URL.Path = path
-	router.ServeHTTP(w, r)
-}
+	// Gunakan PORT dari environment variable (untuk Render) atau default ke 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	port = ":" + port
 
-func main() {
-	// Untuk development lokal
-	port := ":8080"
-	fmt.Printf("Server starting on port %s\n", port)
-
-	http.HandleFunc("/", Handler)
-	http.ListenAndServe(port, nil)
+	router.Run(port)
 }
