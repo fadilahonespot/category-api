@@ -184,12 +184,6 @@ func main() {
 		c.Status(http.StatusNoContent)
 	})
 
-	// Gunakan PORT dari environment variable (untuk Render) atau default ke 8080
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	port = ":" + port
-
+	port := ":8080"
 	router.Run(port)
 }
